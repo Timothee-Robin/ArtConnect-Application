@@ -6,6 +6,7 @@ import java.util.List;
 public class CommunityMember {
     private String name;
     private String email;
+    private String password;
     private Integer birthYear;
     private String phone;
     private String city;
@@ -20,6 +21,14 @@ public class CommunityMember {
     public CommunityMember(String name, String email) {
         this.name = name;
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getName() {

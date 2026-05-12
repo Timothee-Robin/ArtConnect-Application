@@ -27,8 +27,29 @@ public class InMemoryCommunityService implements CommunityService {
         CommunityMember m = new CommunityMember(name, email);
         m.setCity(city);
         m.setMembershipType("Premium");
+        m.setPassword("password123");
         members.put(name, m);
         return m;
+    }
+
+    @Override
+    public Optional<CommunityMember> authenticate(String username, String password) {
+        if (members.containsKey(username)) {
+            CommunityMember m = members.get(username);
+            if (m.getPassword() != null && m.getPassword().equals(password)) {
+                return Optional.of(m);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean register(CommunityMember member) {
+        if (members.containsKey(member.getName())) {
+            return false;
+        }
+        members.put(member.getName(), member);
+        return true;
     }
 
     private void addReview(CommunityMember member, Artwork artwork, int rating, String comment) {

@@ -54,6 +54,47 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
         return members;
     }
 
+    @Override
+    public Optional<CommunityMember> findByName(String name) {
+        String sql = "SELECT * FROM Community_Member WHERE name = ?";
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, name);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public void save(CommunityMember member) {
+        String sql = "INSERT INTO Community_Member (name, email, password, birthYear, phone, city, membershipType) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, member.getName());
+            ps.setString(2, member.getEmail());
+            ps.setString(3, member.getPassword());
+            if (member.getBirthYear() != null) {
+                ps.setInt(4, member.getBirthYear());
+            } else {
+                ps.setNull(4, java.sql.Types.INTEGER);
+            }
+            ps.setString(5, member.getPhone());
+            ps.setString(6, member.getCity());
+            ps.setString(7, member.getMembershipType());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Maps a ResultSet row to a CommunityMember object.
      */
@@ -61,6 +102,9 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
         CommunityMember m = new CommunityMember();
         m.setName(rs.getString("name"));
         m.setEmail(rs.getString("email"));
+        try {
+            m.setPassword(rs.getString("password"));
+        } catch (SQLException ignore) { /* Handle missing column softly here or ignore */ }
         int birthYear = rs.getInt("birthyear");
         m.setBirthYear(rs.wasNull() ? null : birthYear);
         m.setPhone(rs.getString("phone"));

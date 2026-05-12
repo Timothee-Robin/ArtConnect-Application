@@ -8,4 +8,8 @@ public interface CommunityMemberDao {
     Optional<CommunityMember> findById(Long id);
 
     List<CommunityMember> findAll();
+
+    Optional<CommunityMember> findByName(String name);
+
+    void save(CommunityMember member);
 }

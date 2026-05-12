@@ -19,7 +19,6 @@ public class ServiceProvider {
     private static final GalleryService galleryService;
     private static final WorkshopService workshopService;
     private static final CommunityService communityService;
-    private static final UserService userService;
 
     static {
         if (DatabaseConfig.USE_DATABASE) {
@@ -34,14 +33,12 @@ public class ServiceProvider {
             JdbcExhibitionDao exhibitionDao = new JdbcExhibitionDao();
             JdbcWorkshopDao workshopDao = new JdbcWorkshopDao();
             JdbcCommunityMemberDao communityMemberDao = new JdbcCommunityMemberDao();
-            JdbcUserDao userDao = new JdbcUserDao();
 
             artistService = new DbArtistService(artistDao);
             artworkService = new DbArtworkService(artworkDao);
             galleryService = new DbGalleryService(galleryDao, exhibitionDao);
             workshopService = new DbWorkshopService(workshopDao);
             communityService = new DbCommunityService(communityMemberDao);
-            userService = new DbUserService(userDao);
 
         } else {
             // ==========================================
@@ -54,7 +51,6 @@ public class ServiceProvider {
             InMemoryGalleryService memGalleryService = new InMemoryGalleryService();
             InMemoryWorkshopService memWorkshopService = new InMemoryWorkshopService();
             InMemoryCommunityService memCommunityService = new InMemoryCommunityService();
-            InMemoryUserService memUserService = new InMemoryUserService();
 
             // Initialize in-memory services with their dependencies
             memArtworkService.initData(memArtistService);
@@ -67,12 +63,7 @@ public class ServiceProvider {
             galleryService = memGalleryService;
             workshopService = memWorkshopService;
             communityService = memCommunityService;
-            userService = memUserService;
         }
-    }
-
-    public static UserService getUserService() {
-        return userService;
     }
 
     public static ArtistService getArtistService() {

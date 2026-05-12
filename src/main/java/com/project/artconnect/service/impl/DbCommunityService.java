@@ -26,6 +26,27 @@ public class DbCommunityService implements CommunityService {
     }
 
     @Override
+    public Optional<CommunityMember> authenticate(String username, String password) {
+        Optional<CommunityMember> optMem = memberDao.findByName(username);
+        if (optMem.isPresent()) {
+            CommunityMember m = optMem.get();
+            if (m.getPassword() != null && m.getPassword().equals(password)) {
+                return Optional.of(m);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean register(CommunityMember member) {
+        if (memberDao.findByName(member.getName()).isPresent()) {
+            return false; // username (name) already exists
+        }
+        memberDao.save(member);
+        return true;
+    }
+
+    @Override
     public List<CommunityMember> getAllMembers() {
         return memberDao.findAll();
     }

@@ -11,4 +11,8 @@ public interface CommunityService {
     Optional<CommunityMember> getMemberByName(String name);
 
     List<Review> getReviewsByMember(CommunityMember member);
+
+    Optional<CommunityMember> authenticate(String username, String password);
+
+    boolean register(CommunityMember member);
 }
