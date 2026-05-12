@@ -1,8 +1,3 @@
-<<<<<<< Updated upstream
-# ArtConnect-Application
-
-Timtim le noob
-=======
 # ArtConnect Pro - Local Art Community Platform
 
 ## Overview
@@ -60,4 +55,3 @@ graph TD
 2. Search for an artist by name or filter by discipline in the Artists Tab.
 3. View the "Discover" tab to see featured content dynamically generated.
 4. Once you implement JDBC, swap the `ServiceProvider` to use your `JdbcArtistDao` and verify data is fetched from MySQL.
->>>>>>> Stashed changes
