@@ -40,7 +40,8 @@ CREATE TABLE Community_Member (
     birthYear INT,
     phone VARCHAR(50),
     city VARCHAR(50),
-    membershipType VARCHAR(50)
+    membershipType VARCHAR(50),
+    password VARCHAR(50)
 );
 
 CREATE TABLE Workshop (
