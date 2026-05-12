@@ -47,7 +47,7 @@ graph TD
     Service --> DAO[DAO Interfaces]
     DAO --> JDBC[JDBC Persistence Implementation]
     DAO --> InMemory[InMemory Mock Implementation]
-    JDBC --> DB[(MySQL Database)]
+    JDBC --> DB[(Postgresql Database)]
 ```
 
 ## Testing Instructions
