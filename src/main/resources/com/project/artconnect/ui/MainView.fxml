@@ -19,6 +19,7 @@
         <Button fx:id="loginButton" text="Login" onAction="#handleLogin" />
         <Button fx:id="registerButton" text="Register" onAction="#handleRegister" />
         <Button fx:id="logoutButton" text="Logout" onAction="#handleLogout" visible="false" managed="false" />
+        <Button fx:id="refreshButton" text="Refresh Data" onAction="#handleRefresh" />
     </HBox>
     
     <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">

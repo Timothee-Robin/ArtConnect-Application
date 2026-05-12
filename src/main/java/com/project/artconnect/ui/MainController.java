@@ -165,6 +165,14 @@ public class MainController {
         updateUserUI();
     }
 
+    @FXML
+    private void handleRefresh() {
+        // Just print heavily or update status for now
+        // Sub-tabs usually need to handle their own refresh
+        statusLabel.setText("ArtConnect Pro v1.0 | Mode: " + ServiceProvider.getModeName() + " (Data Refreshed)");
+        // if you want to notify tabs you could do this here if you had access to sub controllers
+    }
+
     private void updateUserUI() {
         if (currentUser != null) {
             userLabel.setText("Logged in as: " + currentUser + " (" + currentRole + ")");
