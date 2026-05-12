@@ -24,25 +24,25 @@
     
     <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <Tab text="Discover">
-            <fx:include source="DiscoverTab.fxml"/>
+            <fx:include fx:id="discoverTab" source="DiscoverTab.fxml"/>
         </Tab>
         <Tab text="Artists">
-            <fx:include source="ArtistsTab.fxml"/>
+            <fx:include fx:id="artistsTab" source="ArtistsTab.fxml"/>
         </Tab>
         <Tab text="Artworks">
-            <fx:include source="ArtworksTab.fxml"/>
+            <fx:include fx:id="artworksTab" source="ArtworksTab.fxml"/>
         </Tab>
         <Tab text="Galleries">
-            <fx:include source="GalleriesTab.fxml"/>
+            <fx:include fx:id="galleriesTab" source="GalleriesTab.fxml"/>
         </Tab>
         <Tab text="Exhibitions">
-            <fx:include source="ExhibitionsTab.fxml"/>
+            <fx:include fx:id="exhibitionsTab" source="ExhibitionsTab.fxml"/>
         </Tab>
         <Tab text="Workshops">
-            <fx:include source="WorkshopsTab.fxml"/>
+            <fx:include fx:id="workshopsTab" source="WorkshopsTab.fxml"/>
         </Tab>
         <Tab text="Community">
-            <fx:include source="CommunityTab.fxml"/>
+            <fx:include fx:id="communityTab" source="CommunityTab.fxml"/>
         </Tab>
     </TabPane>
     

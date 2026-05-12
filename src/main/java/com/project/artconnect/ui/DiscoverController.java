@@ -22,6 +22,12 @@ public class DiscoverController {
 
     @FXML
     public void initialize() {
+        refreshTable();
+    }
+
+    public void refreshTable() {
+        discoverPane.getChildren().clear();
+
         // Collect some exhibitions from galleries
         List<Exhibition> featuredExhibitions = new ArrayList<>();
         for (Gallery g : galleryService.getAllGalleries()) {

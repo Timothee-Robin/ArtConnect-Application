@@ -37,10 +37,10 @@ public class ExhibitionController {
         galleryColumn.setCellValueFactory(cellData -> new SimpleStringProperty(
                 cellData.getValue().getGallery() != null ? cellData.getValue().getGallery().getName() : "Unknown"));
 
-        refreshData();
+        refreshTable();
     }
 
-    private void refreshData() {
+    public void refreshTable() {
         List<Exhibition> all = new ArrayList<>();
         for (Gallery g : galleryService.getAllGalleries()) {
             all.addAll(g.getExhibitions());

@@ -27,6 +27,10 @@ public class CommunityController {
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         cityColumn.setCellValueFactory(new PropertyValueFactory<>("city"));
 
+        refreshTable();
+    }
+
+    public void refreshTable() {
         memberTable.setItems(FXCollections.observableArrayList(communityService.getAllMembers()));
     }
 }

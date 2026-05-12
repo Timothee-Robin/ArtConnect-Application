@@ -41,7 +41,7 @@ public class ArtworkController {
         refreshTable();
     }
 
-    private void refreshTable() {
+    public void refreshTable() {
         artworkTable.setItems(FXCollections.observableArrayList(artworkService.getAllArtworks()));
     }
 

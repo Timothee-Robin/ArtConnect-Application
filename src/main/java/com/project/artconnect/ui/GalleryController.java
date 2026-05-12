@@ -15,7 +15,7 @@ public class GalleryController {
 
     @FXML
     public void initialize() {
-        galleryList.setItems(FXCollections.observableArrayList(galleryService.getAllGalleries()));
+        refreshTable();
 
         // Custom cell factory to show more info
         galleryList.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
@@ -29,5 +29,9 @@ public class GalleryController {
                 }
             }
         });
+    }
+
+    public void refreshTable() {
+        galleryList.setItems(FXCollections.observableArrayList(galleryService.getAllGalleries()));
     }
 }

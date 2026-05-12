@@ -175,7 +175,7 @@ public class ArtistController {
         alert.showAndWait();
     }
 
-    private void refreshTable() {
+    public void refreshTable() {
         artistTable.setItems(FXCollections.observableArrayList(artistService.getAllArtists()));
     }
 }

@@ -24,6 +24,14 @@ public class MainController {
     @FXML
     private Button logoutButton;
 
+    @FXML private DiscoverController discoverTabController;
+    @FXML private ArtistController artistsTabController;
+    @FXML private ArtworkController artworksTabController;
+    @FXML private GalleryController galleriesTabController;
+    @FXML private ExhibitionController exhibitionsTabController;
+    @FXML private WorkshopController workshopsTabController;
+    @FXML private CommunityController communityTabController;
+
     private String currentUser = null;
     private String currentRole = null;
 
@@ -167,10 +175,15 @@ public class MainController {
 
     @FXML
     private void handleRefresh() {
-        // Just print heavily or update status for now
-        // Sub-tabs usually need to handle their own refresh
+        if (discoverTabController != null) discoverTabController.refreshTable();
+        if (artistsTabController != null) artistsTabController.refreshTable();
+        if (artworksTabController != null) artworksTabController.refreshTable();
+        if (galleriesTabController != null) galleriesTabController.refreshTable();
+        if (exhibitionsTabController != null) exhibitionsTabController.refreshTable();
+        if (workshopsTabController != null) workshopsTabController.refreshTable();
+        if (communityTabController != null) communityTabController.refreshTable();
+
         statusLabel.setText("ArtConnect Pro v1.0 | Mode: " + ServiceProvider.getModeName() + " (Data Refreshed)");
-        // if you want to notify tabs you could do this here if you had access to sub controllers
     }
 
     private void updateUserUI() {
