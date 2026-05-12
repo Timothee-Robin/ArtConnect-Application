@@ -13,6 +13,13 @@
             <MenuItem text="About"/>
         </Menu>
     </MenuBar>
+
+    <HBox alignment="CENTER_RIGHT" spacing="10.0" style="-fx-padding: 5 10 5 10; -fx-background-color: #e0e0e0;">
+        <Label fx:id="userLabel" text="Not logged in" />
+        <Button fx:id="loginButton" text="Login" onAction="#handleLogin" />
+        <Button fx:id="registerButton" text="Register" onAction="#handleRegister" />
+        <Button fx:id="logoutButton" text="Logout" onAction="#handleLogout" visible="false" managed="false" />
+    </HBox>
     
     <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <Tab text="Discover">
