@@ -67,14 +67,17 @@ public class MainController {
         });
 
         dialog.showAndWait().ifPresent(credentials -> {
-            // Mock authentication check for now
-            // Ideally, you'd use UserService.authenticate(credentials[0], credentials[1])
-            String user = credentials[0];
-            if (!user.isEmpty()) {
-                currentUser = user;
-                currentRole = "admin".equals(user) ? "admin" : "user";
-                updateUserUI();
-            }
+            ServiceProvider.getUserService()
+                .authenticate(credentials[0], credentials[1])
+                .ifPresentOrElse(user -> {
+                    currentUser = user.getUsername();
+                    currentRole = user.getRole();
+                    updateUserUI();
+                }, () -> {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setContentText("Invalid username or password.");
+                    alert.showAndWait();
+                });
         });
     }
 
@@ -96,32 +99,33 @@ public class MainController {
         username.setPromptText("Username");
         PasswordField password = new PasswordField();
         password.setPromptText("Password");
-        ComboBox<String> roleCombo = new ComboBox<>();
-        roleCombo.getItems().addAll("user", "admin");
-        roleCombo.setValue("user");
+        // Removed Role ComboBox: Always register as 'user'
 
         grid.add(new Label("Username:"), 0, 0);
         grid.add(username, 1, 0);
         grid.add(new Label("Password:"), 0, 1);
         grid.add(password, 1, 1);
-        grid.add(new Label("Role:"), 0, 2);
-        grid.add(roleCombo, 1, 2);
 
         dialog.getDialogPane().setContent(grid);
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == registerBtnType) {
-                return new String[]{username.getText(), password.getText(), roleCombo.getValue()};
+                return new String[]{username.getText(), password.getText(), "user"};
             }
             return null;
         });
 
         dialog.showAndWait().ifPresent(credentials -> {
-            // Mock registration for now
-            // Ideally: UserService.register(credentials[0], credentials[1], credentials[2])
-            Alert msg = new Alert(Alert.AlertType.INFORMATION);
-            msg.setContentText("Registered user: " + credentials[0] + " with role: " + credentials[2]);
-            msg.showAndWait();
+            boolean success = ServiceProvider.getUserService().register(credentials[0], credentials[1], credentials[2]);
+            if (success) {
+                Alert msg = new Alert(Alert.AlertType.INFORMATION);
+                msg.setContentText("Registered successfully! You can now log in.");
+                msg.showAndWait();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("Username already taken.");
+                alert.showAndWait();
+            }
         });
     }
 
