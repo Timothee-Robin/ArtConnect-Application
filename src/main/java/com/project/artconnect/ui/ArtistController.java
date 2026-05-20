@@ -134,7 +134,9 @@ public class ArtistController {
         TextField phoneField = new TextField(); phoneField.setPromptText("Phone (e.g. 0612345678)");
         TextField websiteField = new TextField(); websiteField.setPromptText("Website");
         TextField bioField = new TextField(); bioField.setPromptText("Bio");
-
+        ComboBox<Discipline> disciplineBox = new ComboBox<>(FXCollections.observableArrayList(artistService.getAllDisciplines()));
+        disciplineBox.setPromptText("Select Discipline");
+        disciplineBox.setMaxWidth(Double.MAX_VALUE);
         if (existing != null) {
             nameField.setText(existing.getName()); nameField.setDisable(true);
             cityField.setText(existing.getCity());
@@ -143,6 +145,9 @@ public class ArtistController {
             phoneField.setText(existing.getPhone());
             websiteField.setText(existing.getWebsite());
             bioField.setText(existing.getBio());
+            if (existing.getDisciplines() != null && !existing.getDisciplines().isEmpty()) {
+                disciplineBox.setValue(existing.getDisciplines().iterator().next());
+            }
         }
 
         grid.add(new Label("Name *:"), 0, 0); grid.add(nameField, 1, 0);
@@ -152,6 +157,7 @@ public class ArtistController {
         grid.add(new Label("Phone:"), 0, 4); grid.add(phoneField, 1, 4);
         grid.add(new Label("Website:"), 0, 5); grid.add(websiteField, 1, 5);
         grid.add(new Label("Bio:"), 0, 6); grid.add(bioField, 1, 6);
+        grid.add(new Label("Discipline:"), 0, 7); grid.add(disciplineBox, 1, 7);
         dialog.getDialogPane().setContent(grid);
 
         dialog.setResultConverter(db -> {
@@ -175,9 +181,11 @@ public class ArtistController {
                 a.setWebsite(websiteField.getText().trim());
                 a.setBio(bioField.getText().trim());
                 if (existing != null) {
-                a.setId(existing.getId());
-                a.setDisciplines(existing.getDisciplines());
-            }
+                    a.setId(existing.getId());
+                }
+                if (disciplineBox.getValue() != null) {
+                    a.setDisciplines(java.util.Collections.singletonList(disciplineBox.getValue()));
+                }
                 return a;
             }
             return null;

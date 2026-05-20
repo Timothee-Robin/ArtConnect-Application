@@ -176,6 +176,7 @@ public class WorkshopController {
 
                 Workshop w = new Workshop(title, date, instructorBox.getValue(),
                         priceStr.isEmpty() ? 0.0 : Double.parseDouble(priceStr));
+                if (existing != null) w.setId(existing.getId());
                 if (!durStr.isEmpty()) w.setDurationMinutes(Integer.parseInt(durStr));
                 if (!maxStr.isEmpty()) w.setMaxParticipants(Integer.parseInt(maxStr));
                 w.setLocation(locationField.getText().trim());

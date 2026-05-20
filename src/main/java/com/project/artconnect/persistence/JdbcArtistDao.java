@@ -2,6 +2,7 @@ package com.project.artconnect.persistence;
 
 import com.project.artconnect.dao.ArtistDao;
 import com.project.artconnect.model.Artist;
+import com.project.artconnect.model.Discipline;
 import com.project.artconnect.util.ConnectionManager;
 
 import java.sql.*;
@@ -38,24 +39,48 @@ public class JdbcArtistDao implements ArtistDao {
         String sql = "INSERT INTO Artist (name, bio, contact_email, phone, city, website, socialMedia, isActive, birthYear) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = ConnectionManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, artist.getName());
-            ps.setString(2, artist.getBio());
-            ps.setString(3, artist.getContactEmail());
-            ps.setString(4, artist.getPhone());
-            ps.setString(5, artist.getCity());
-            ps.setString(6, artist.getWebsite());
-            ps.setString(7, artist.getSocialMedia());
-            ps.setBoolean(8, artist.isActive());
-            if (artist.getBirthYear() != null) {
-                ps.setInt(9, artist.getBirthYear());
-            } else {
-                ps.setNull(9, Types.INTEGER);
+        try (Connection conn = ConnectionManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                Long artistId;
+                try (PreparedStatement ps = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                    ps.setString(1, artist.getName());
+                    ps.setString(2, artist.getBio());
+                    ps.setString(3, artist.getContactEmail());
+                    ps.setString(4, artist.getPhone());
+                    ps.setString(5, artist.getCity());
+                    ps.setString(6, artist.getWebsite());
+                    ps.setString(7, artist.getSocialMedia());
+                    ps.setBoolean(8, artist.isActive());
+                    if (artist.getBirthYear() != null) {
+                        ps.setInt(9, artist.getBirthYear());
+                    } else {
+                        ps.setNull(9, Types.INTEGER);
+                    }
+                    ps.executeUpdate();
+                    try (ResultSet rs = ps.getGeneratedKeys()) {
+                        rs.next();
+                        artistId = rs.getLong(1);
+                    }
+                }
+                // Insert into Practice table
+                if (artist.getDisciplines() != null && !artist.getDisciplines().isEmpty()) {
+                    String practiceSql = "INSERT INTO Practice (Artist_ID, Discipline_ID) VALUES (?, ?)";
+                    for (Discipline d : artist.getDisciplines()) {
+                        try (PreparedStatement ps = conn.prepareStatement(practiceSql)) {
+                            ps.setLong(1, artistId);
+                            ps.setLong(2, d.getId());
+                            ps.executeUpdate();
+                        }
+                    }
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
-
-            ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error saving artist: " + e.getMessage());
             e.printStackTrace();
@@ -67,25 +92,48 @@ public class JdbcArtistDao implements ArtistDao {
         String sql = "UPDATE Artist SET name = ?, bio = ?, contact_email = ?, phone = ?, city = ?, "
                    + "website = ?, socialMedia = ?, isActive = ?, birthYear = ? WHERE Artist_ID = ?";
 
-        try (Connection conn = ConnectionManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, artist.getName());
-            ps.setString(2, artist.getBio());
-            ps.setString(3, artist.getContactEmail());
-            ps.setString(4, artist.getPhone());
-            ps.setString(5, artist.getCity());
-            ps.setString(6, artist.getWebsite());
-            ps.setString(7, artist.getSocialMedia());
-            ps.setBoolean(8, artist.isActive());
-            if (artist.getBirthYear() != null) {
-                ps.setInt(9, artist.getBirthYear());
-            } else {
-                ps.setNull(9, Types.INTEGER);
+        try (Connection conn = ConnectionManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setString(1, artist.getName());
+                    ps.setString(2, artist.getBio());
+                    ps.setString(3, artist.getContactEmail());
+                    ps.setString(4, artist.getPhone());
+                    ps.setString(5, artist.getCity());
+                    ps.setString(6, artist.getWebsite());
+                    ps.setString(7, artist.getSocialMedia());
+                    ps.setBoolean(8, artist.isActive());
+                    if (artist.getBirthYear() != null) {
+                        ps.setInt(9, artist.getBirthYear());
+                    } else {
+                        ps.setNull(9, Types.INTEGER);
+                    }
+                    ps.setLong(10, artist.getId());
+                    ps.executeUpdate();
+                }
+                // Replace disciplines: delete all, then re-insert
+                try (PreparedStatement ps = conn.prepareStatement("DELETE FROM Practice WHERE Artist_ID = ?")) {
+                    ps.setLong(1, artist.getId());
+                    ps.executeUpdate();
+                }
+                if (artist.getDisciplines() != null && !artist.getDisciplines().isEmpty()) {
+                    String practiceSql = "INSERT INTO Practice (Artist_ID, Discipline_ID) VALUES (?, ?)";
+                    for (Discipline d : artist.getDisciplines()) {
+                        try (PreparedStatement ps = conn.prepareStatement(practiceSql)) {
+                            ps.setLong(1, artist.getId());
+                            ps.setLong(2, d.getId());
+                            ps.executeUpdate();
+                        }
+                    }
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
-            ps.setLong(10, artist.getId());
-
-            ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error updating artist: " + e.getMessage());
             e.printStackTrace();

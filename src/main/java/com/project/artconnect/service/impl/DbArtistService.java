@@ -64,16 +64,18 @@ public class DbArtistService implements ArtistService {
     }
 
     @Override
-    public List<Discipline> getAllDisciplines() {
+public List<Discipline> getAllDisciplines() {
         List<Discipline> disciplines = new ArrayList<>();
-        String sql = "SELECT name FROM Discipline ORDER BY Discipline_ID";
+        String sql = "SELECT Discipline_ID, name FROM Discipline ORDER BY Discipline_ID";
 
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                disciplines.add(new Discipline(rs.getString("name")));
+                Discipline d = new Discipline(rs.getString("name"));
+                d.setId(rs.getLong("Discipline_ID"));
+                disciplines.add(d);
             }
         } catch (SQLException e) {
             System.err.println("Error fetching disciplines: " + e.getMessage());
@@ -98,9 +100,9 @@ public class DbArtistService implements ArtistService {
     /**
      * Loads the list of disciplines for a given artist from the Practice join table.
      */
-    private List<Discipline> loadDisciplinesForArtist(String artistName) {
+private List<Discipline> loadDisciplinesForArtist(String artistName) {
         List<Discipline> disciplines = new ArrayList<>();
-        String sql = "SELECT d.name FROM Discipline d "
+        String sql = "SELECT d.Discipline_ID, d.name FROM Discipline d "
                    + "JOIN Practice p ON d.Discipline_ID = p.Discipline_ID "
                    + "JOIN Artist a ON a.Artist_ID = p.Artist_ID "
                    + "WHERE a.name = ?";
@@ -111,7 +113,9 @@ public class DbArtistService implements ArtistService {
             ps.setString(1, artistName);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    disciplines.add(new Discipline(rs.getString("name")));
+                    Discipline d = new Discipline(rs.getString("name"));
+                    d.setId(rs.getLong("Discipline_ID"));
+                    disciplines.add(d);
                 }
             }
         } catch (SQLException e) {
