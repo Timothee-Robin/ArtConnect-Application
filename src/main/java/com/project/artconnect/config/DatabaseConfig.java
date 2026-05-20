@@ -16,7 +16,7 @@ public class DatabaseConfig {
     // ==========================================
     // Supabase PostgreSQL connection settings
     // ==========================================
-    public static final String URL = "jdbc:postgresql://aws-1-eu-west-2.pooler.supabase.com:6543/postgres";
+    public static final String URL = "jdbc:postgresql://aws-1-eu-west-2.pooler.supabase.com:6543/postgres?prepareThreshold=0";
     public static final String USER = "postgres.squtwhavrtsekeqsrngp";
     public static final String PASSWORD = "";
 }
