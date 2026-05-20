@@ -14,6 +14,7 @@ public class CommunityMember {
     private String membershipType; // free, premium
     private List<Booking> bookings = new ArrayList<>();
     private List<Review> reviews = new ArrayList<>();
+    private String role = "user"; // 'user' or 'admin'
 
     public CommunityMember() {
     }
@@ -101,6 +102,14 @@ public class CommunityMember {
 
     public void setReviews(List<Review> reviews) {
         this.reviews = reviews;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public void addBooking(Booking booking) {

@@ -12,14 +12,19 @@
         <TextField fx:id="searchField" promptText="Search artists..." HBox.hgrow="ALWAYS" />
         <ComboBox fx:id="disciplineFilter" promptText="Filter by Discipline" />
         <Button text="Search" onAction="#handleSearch" />
-        <Button text="Reset" onAction="#handleReset" />
     </HBox>
     <TableView fx:id="artistTable" VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="nameColumn" text="Name" prefWidth="200" />
             <TableColumn fx:id="cityColumn" text="City" prefWidth="150" />
             <TableColumn fx:id="emailColumn" text="Email" prefWidth="200" />
-            <TableColumn fx:id="yearColumn" text="Birth Year" prefWidth="100" />
+            <TableColumn fx:id="disciplineColumn" text="Discipline" prefWidth="150" />
         </columns>
     </TableView>
+
+    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+        <Button fx:id="addButton" text="Add Artist" onAction="#handleAddArtist" />
+        <Button fx:id="editButton" text="Edit Selected" onAction="#handleEditArtist" />
+        <Button fx:id="deleteButton" text="Delete Selected" onAction="#handleDeleteArtist" />
+    </HBox>
 </VBox>

@@ -11,6 +11,7 @@ import java.util.*;
 
 public class InMemoryWorkshopService implements WorkshopService {
     private final Map<String, Workshop> workshops = new LinkedHashMap<>();
+    private long nextId = 1L;
 
     public InMemoryWorkshopService() {
     }
@@ -36,14 +37,30 @@ public class InMemoryWorkshopService implements WorkshopService {
         workshops.put(title, w);
     }
 
-    @Override
-    public List<Workshop> getAllWorkshops() {
-        return new ArrayList<>(workshops.values());
+    // CRUD
+    public Workshop createWorkshop(Workshop workshop) {
+        workshop.setTitle(workshop.getTitle()); // name stays as-is
+        workshops.put(workshop.getTitle(), workshop);
+        return workshop;
+    }
+
+    public Workshop updateWorkshop(Workshop workshop) {
+        // title is key — if title changed, this won't update. acceptable for demo.
+        workshops.put(workshop.getTitle(), workshop);
+        return workshop;
+    }
+
+    public void deleteWorkshop(String title) {
+        workshops.remove(title);
+    }
+
+    public Optional<Workshop> getWorkshopByTitle(String title) {
+        return Optional.ofNullable(workshops.get(title));
     }
 
     @Override
-    public Optional<Workshop> getWorkshopByTitle(String title) {
-        return Optional.ofNullable(workshops.get(title));
+    public List<Workshop> getAllWorkshops() {
+        return new ArrayList<>(workshops.values());
     }
 
     @Override

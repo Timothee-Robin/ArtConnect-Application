@@ -59,8 +59,8 @@ public class DbArtistService implements ArtistService {
     }
 
     @Override
-    public void deleteArtist(String name) {
-        artistDao.delete(name);
+    public void deleteArtist(Long id) {
+        artistDao.delete(id);
     }
 
     @Override

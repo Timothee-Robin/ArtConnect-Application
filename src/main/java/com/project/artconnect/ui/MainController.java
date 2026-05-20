@@ -1,6 +1,7 @@
 package com.project.artconnect.ui;
 
 import com.project.artconnect.model.CommunityMember;
+import com.project.artconnect.service.CommunityService;
 import com.project.artconnect.util.ServiceProvider;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -8,13 +9,15 @@ import javafx.application.Platform;
 import javafx.scene.layout.GridPane;
 import javafx.geometry.Insets;
 
+import java.util.Optional;
+
 public class MainController {
     @FXML
     private TabPane mainTabPane;
 
     @FXML
     private Label statusLabel;
-    
+
     @FXML
     private Label userLabel;
     @FXML
@@ -34,10 +37,17 @@ public class MainController {
 
     private String currentUser = null;
     private String currentRole = null;
+    private CommunityMember loggedInMember = null;
+
+    // Getters so sub-controllers can check permissions
+    public String getCurrentUser() { return currentUser; }
+    public String getCurrentRole() { return currentRole; }
+    public boolean isLoggedIn() { return currentUser != null; }
+    public boolean isAdmin() { return "admin".equals(currentRole); }
 
     @FXML
     public void initialize() {
-        // Display the current data mode (Supabase or In-Memory) in the status bar
+        ServiceProvider.setMainController(this);
         statusLabel.setText("ArtConnect Pro v1.0 | Mode: " + ServiceProvider.getModeName());
         updateUserUI();
     }
@@ -76,17 +86,18 @@ public class MainController {
         });
 
         dialog.showAndWait().ifPresent(credentials -> {
-            ServiceProvider.getCommunityService()
-                .authenticate(credentials[0], credentials[1])
-                .ifPresentOrElse(user -> {
-                    currentUser = user.getName();
-                    currentRole = "user"; // Simplified for CommunityMember
-                    updateUserUI();
-                }, () -> {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setContentText("Invalid username or password.");
-                    alert.showAndWait();
-                });
+            if (credentials[0].trim().isEmpty() || credentials[1].trim().isEmpty()) {
+                showError("Please enter both username and password.");
+                return;
+            }
+            Optional<CommunityMember> user = ServiceProvider.getCommunityService()
+                .authenticate(credentials[0].trim(), credentials[1]);
+            user.ifPresentOrElse(m -> {
+                currentUser = m.getName();
+                currentRole = m.getRole();
+                loggedInMember = m;
+                updateUserUI();
+            }, () -> showError("Invalid username or password."));
         });
     }
 
@@ -111,11 +122,7 @@ public class MainController {
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Password");
         TextField yearField = new TextField();
-        yearField.setPromptText("Birth Year (Optional)");
-        TextField phoneField = new TextField();
-        phoneField.setPromptText("Phone (Optional)");
-        TextField cityField = new TextField();
-        cityField.setPromptText("City (Optional)");
+        yearField.setPromptText("Birth Year (e.g. 1995)");
 
         grid.add(new Label("Name:"), 0, 0);
         grid.add(nameField, 1, 0);
@@ -125,28 +132,48 @@ public class MainController {
         grid.add(passwordField, 1, 2);
         grid.add(new Label("Birth Year:"), 0, 3);
         grid.add(yearField, 1, 3);
-        grid.add(new Label("Phone:"), 0, 4);
-        grid.add(phoneField, 1, 4);
-        grid.add(new Label("City:"), 0, 5);
-        grid.add(cityField, 1, 5);
 
         dialog.getDialogPane().setContent(grid);
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == registerBtnType) {
-                if (nameField.getText().trim().isEmpty() || emailField.getText().trim().isEmpty() || passwordField.getText().trim().isEmpty()) {
-                    return null; // Require at least name, email, password
+                // Validation
+                String name = nameField.getText().trim();
+                String email = emailField.getText().trim();
+                String password = passwordField.getText();
+                String yearStr = yearField.getText().trim();
+
+                if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                    showError("Name, Email and Password are required.");
+                    return null;
                 }
-                CommunityMember member = new CommunityMember(nameField.getText().trim(), emailField.getText().trim());
-                member.setPassword(passwordField.getText());
-                if (!yearField.getText().trim().isEmpty()) {
+                if (password.length() < 6) {
+                    showError("Password must be at least 6 characters.");
+                    return null;
+                }
+                if (!email.contains("@") || !email.contains(".")) {
+                    showError("Please enter a valid email address.");
+                    return null;
+                }
+                if (!yearStr.isEmpty()) {
                     try {
-                        member.setBirthYear(Integer.parseInt(yearField.getText().trim()));
-                    } catch (NumberFormatException ignored) {}
+                        int year = Integer.parseInt(yearStr);
+                        if (year < 1900 || year > 2010) {
+                            showError("Birth year must be between 1900 and 2010.");
+                            return null;
+                        }
+                    } catch (NumberFormatException e) {
+                        showError("Birth year must be a valid number.");
+                        return null;
+                    }
                 }
-                member.setPhone(phoneField.getText().trim());
-                member.setCity(cityField.getText().trim());
-                member.setMembershipType("free"); // Default
+
+                CommunityMember member = new CommunityMember(name, email);
+                member.setPassword(password);
+                if (!yearStr.isEmpty()) {
+                    member.setBirthYear(Integer.parseInt(yearStr));
+                }
+                member.setRole("user");
                 return member;
             }
             return null;
@@ -155,13 +182,9 @@ public class MainController {
         dialog.showAndWait().ifPresent(member -> {
             boolean success = ServiceProvider.getCommunityService().register(member);
             if (success) {
-                Alert msg = new Alert(Alert.AlertType.INFORMATION);
-                msg.setContentText("Registered successfully! You can now log in.");
-                msg.showAndWait();
+                showInfo("Registered successfully! You can now log in.");
             } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setContentText("Username (Name) already taken. Please choose another.");
-                alert.showAndWait();
+                showError("Username (Name) already taken. Please choose another.");
             }
         });
     }
@@ -170,6 +193,7 @@ public class MainController {
     private void handleLogout() {
         currentUser = null;
         currentRole = null;
+        loggedInMember = null;
         updateUserUI();
     }
 
@@ -204,6 +228,22 @@ public class MainController {
             logoutButton.setVisible(false);
             logoutButton.setManaged(false);
         }
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML

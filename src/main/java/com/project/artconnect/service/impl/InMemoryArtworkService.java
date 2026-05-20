@@ -8,6 +8,7 @@ import java.util.*;
 
 public class InMemoryArtworkService implements ArtworkService {
     private final Map<String, Artwork> artworks = new LinkedHashMap<>();
+    private Long nextId = 1L;
 
     public InMemoryArtworkService() {
         // Data initialized after ArtistService is ready
@@ -32,6 +33,7 @@ public class InMemoryArtworkService implements ArtworkService {
         if (artist == null)
             return;
         Artwork a = new Artwork(title, year, type, price, artist);
+        a.setId(nextId++);
         a.setMedium("Traditional " + type);
         a.setDimensions("Varies");
         a.setDescription("A legendary masterpiece by " + artist.getName());
@@ -58,6 +60,9 @@ public class InMemoryArtworkService implements ArtworkService {
 
     @Override
     public void createArtwork(Artwork artwork) {
+        if (artwork.getId() == null) {
+            artwork.setId(nextId++);
+        }
         artworks.put(artwork.getTitle(), artwork);
     }
 
@@ -67,7 +72,7 @@ public class InMemoryArtworkService implements ArtworkService {
     }
 
     @Override
-    public void deleteArtwork(String title) {
-        artworks.remove(title);
+    public void deleteArtwork(Long id) {
+        artworks.values().removeIf(a -> Objects.equals(a.getId(), id));
     }
 }

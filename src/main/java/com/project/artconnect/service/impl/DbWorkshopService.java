@@ -94,4 +94,21 @@ public class DbWorkshopService implements WorkshopService {
         }
         return bookings;
     }
+
+    @Override
+    public Workshop createWorkshop(Workshop workshop) {
+        workshopDao.save(workshop);
+        return workshop;
+    }
+
+    @Override
+    public Workshop updateWorkshop(Workshop workshop) {
+        workshopDao.update(workshop);
+        return workshop;
+    }
+
+    @Override
+    public void deleteWorkshop(String title) {
+        workshopDao.delete(title);
+    }
 }

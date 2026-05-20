@@ -64,25 +64,26 @@ public class JdbcArtistDao implements ArtistDao {
 
     @Override
     public void update(Artist artist) {
-        String sql = "UPDATE Artist SET bio = ?, contact_email = ?, phone = ?, city = ?, "
-                   + "website = ?, socialMedia = ?, isActive = ?, birthYear = ? WHERE name = ?";
+        String sql = "UPDATE Artist SET name = ?, bio = ?, contact_email = ?, phone = ?, city = ?, "
+                   + "website = ?, socialMedia = ?, isActive = ?, birthYear = ? WHERE Artist_ID = ?";
 
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, artist.getBio());
-            ps.setString(2, artist.getContactEmail());
-            ps.setString(3, artist.getPhone());
-            ps.setString(4, artist.getCity());
-            ps.setString(5, artist.getWebsite());
-            ps.setString(6, artist.getSocialMedia());
-            ps.setBoolean(7, artist.isActive());
+            ps.setString(1, artist.getName());
+            ps.setString(2, artist.getBio());
+            ps.setString(3, artist.getContactEmail());
+            ps.setString(4, artist.getPhone());
+            ps.setString(5, artist.getCity());
+            ps.setString(6, artist.getWebsite());
+            ps.setString(7, artist.getSocialMedia());
+            ps.setBoolean(8, artist.isActive());
             if (artist.getBirthYear() != null) {
-                ps.setInt(8, artist.getBirthYear());
+                ps.setInt(9, artist.getBirthYear());
             } else {
-                ps.setNull(8, Types.INTEGER);
+                ps.setNull(9, Types.INTEGER);
             }
-            ps.setString(9, artist.getName());
+            ps.setLong(10, artist.getId());
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -92,17 +93,23 @@ public class JdbcArtistDao implements ArtistDao {
     }
 
     @Override
-    public void delete(String artistName) {
-        String sql = "DELETE FROM Artist WHERE name = ?";
+    public void delete(Long id) {
+        String deactivateSql = "UPDATE Artist SET isActive = false WHERE Artist_ID = ?";
+        String deleteSql = "DELETE FROM Artist WHERE Artist_ID = ?";
 
-        try (Connection conn = ConnectionManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, artistName);
-            ps.executeUpdate();
+        try (Connection conn = ConnectionManager.getConnection()) {
+            // First deactivate (satisfies the trigger)
+            try (PreparedStatement ps = conn.prepareStatement(deactivateSql)) {
+                ps.setLong(1, id);
+                ps.executeUpdate();
+            }
+            // Then delete
+            try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
+                ps.setLong(1, id);
+                ps.executeUpdate();
+            }
         } catch (SQLException e) {
-            System.err.println("Error deleting artist: " + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Database error deleting artist: " + e.getMessage());
         }
     }
 
@@ -132,6 +139,7 @@ public class JdbcArtistDao implements ArtistDao {
      */
     private Artist mapRow(ResultSet rs) throws SQLException {
         Artist a = new Artist();
+        a.setId(rs.getLong("artist_id"));
         a.setName(rs.getString("name"));
         a.setBio(rs.getString("bio"));
         a.setContactEmail(rs.getString("contact_email"));

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 public class InMemoryArtistService implements ArtistService {
     private final Map<String, Artist> artists = new LinkedHashMap<>();
     private final Map<String, Discipline> disciplines = new LinkedHashMap<>();
+    private Long nextId = 1L;
 
     public InMemoryArtistService() {
         initData();
@@ -41,6 +42,7 @@ public class InMemoryArtistService implements ArtistService {
 
     private void addArtist(String name, String bio, int year, String email, String city, String... disciplineNames) {
         Artist a = new Artist(name, bio, year, email, city);
+        a.setId(nextId++);
         for (String dName : disciplineNames) {
             if (disciplines.containsKey(dName)) {
                 a.getDisciplines().add(disciplines.get(dName));
@@ -61,6 +63,9 @@ public class InMemoryArtistService implements ArtistService {
 
     @Override
     public void createArtist(Artist artist) {
+        if (artist.getId() == null) {
+            artist.setId(nextId++);
+        }
         artists.put(artist.getName(), artist);
     }
 
@@ -70,8 +75,8 @@ public class InMemoryArtistService implements ArtistService {
     }
 
     @Override
-    public void deleteArtist(String name) {
-        artists.remove(name);
+    public void deleteArtist(Long id) {
+        artists.values().removeIf(a -> Objects.equals(a.getId(), id));
     }
 
     @Override

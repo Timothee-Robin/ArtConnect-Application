@@ -28,16 +28,17 @@ public class DiscoverController {
     public void refreshTable() {
         discoverPane.getChildren().clear();
 
-        // Collect some exhibitions from galleries
-        List<Exhibition> featuredExhibitions = new ArrayList<>();
-        for (Gallery g : galleryService.getAllGalleries()) {
-            featuredExhibitions.addAll(g.getExhibitions());
-            if (featuredExhibitions.size() >= 3)
-                break;
-        }
+        // Fetch all exhibitions, shuffle them to show random ones each time
+        List<Exhibition> allExhibitions = new ArrayList<>(galleryService.getAllExhibitions());
+        java.util.Collections.shuffle(allExhibitions);
 
-        featuredExhibitions.stream().limit(3).forEach(this::addExhibitionCard);
-        workshopService.getAllWorkshops().stream().limit(3).forEach(this::addWorkshopCard);
+        // Fetch all workshops, shuffle them
+        List<Workshop> allWorkshops = new ArrayList<>(workshopService.getAllWorkshops());
+        java.util.Collections.shuffle(allWorkshops);
+
+        // Display up to 3 random exhibitions and 3 random workshops
+        allExhibitions.stream().limit(3).forEach(this::addExhibitionCard);
+        allWorkshops.stream().limit(3).forEach(this::addWorkshopCard);
     }
 
     private void addExhibitionCard(Exhibition e) {

@@ -40,8 +40,8 @@ public class JdbcArtworkDao implements ArtworkDao {
 
     @Override
     public void save(Artwork artwork) {
-        String sql = "INSERT INTO Artwork (title, creationYear, type, medium, dimension, description, price, statut, Artist_ID) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, (SELECT Artist_ID FROM Artist WHERE name = ?))";
+        String sql = "INSERT INTO Artwork (title, creationYear, type, medium, dimension, description, price, statut, Exhibition_ID, Artist_ID) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -58,7 +58,8 @@ public class JdbcArtworkDao implements ArtworkDao {
             ps.setString(6, artwork.getDescription());
             ps.setDouble(7, artwork.getPrice());
             ps.setString(8, artwork.getStatus() != null ? artwork.getStatus().name() : "FOR_SALE");
-            ps.setString(9, artwork.getArtist() != null ? artwork.getArtist().getName() : null);
+            ps.setNull(9, Types.INTEGER); // Exhibition_ID handled separately if needed
+            ps.setLong(10, artwork.getArtist().getId());
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -69,24 +70,25 @@ public class JdbcArtworkDao implements ArtworkDao {
 
     @Override
     public void update(Artwork artwork) {
-        String sql = "UPDATE Artwork SET creationYear = ?, type = ?, medium = ?, dimension = ?, "
-                   + "description = ?, price = ?, statut = ? WHERE title = ?";
+        String sql = "UPDATE Artwork SET title = ?, creationYear = ?, type = ?, medium = ?, dimension = ?, "
+                   + "description = ?, price = ?, statut = ? WHERE Artwork_ID = ?";
 
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
+            ps.setString(1, artwork.getTitle());
             if (artwork.getCreationYear() != null) {
-                ps.setInt(1, artwork.getCreationYear());
+                ps.setInt(2, artwork.getCreationYear());
             } else {
-                ps.setNull(1, Types.INTEGER);
+                ps.setNull(2, Types.INTEGER);
             }
-            ps.setString(2, artwork.getType());
-            ps.setString(3, artwork.getMedium());
-            ps.setString(4, artwork.getDimensions());
-            ps.setString(5, artwork.getDescription());
-            ps.setDouble(6, artwork.getPrice());
-            ps.setString(7, artwork.getStatus() != null ? artwork.getStatus().name() : "FOR_SALE");
-            ps.setString(8, artwork.getTitle());
+            ps.setString(3, artwork.getType());
+            ps.setString(4, artwork.getMedium());
+            ps.setString(5, artwork.getDimensions());
+            ps.setString(6, artwork.getDescription());
+            ps.setDouble(7, artwork.getPrice());
+            ps.setString(8, artwork.getStatus() != null ? artwork.getStatus().name() : "FOR_SALE");
+            ps.setLong(9, artwork.getId());
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -96,13 +98,13 @@ public class JdbcArtworkDao implements ArtworkDao {
     }
 
     @Override
-    public void delete(String title) {
-        String sql = "DELETE FROM Artwork WHERE title = ?";
+    public void delete(Long id) {
+        String sql = "DELETE FROM Artwork WHERE Artwork_ID = ?";
 
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, title);
+            ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error deleting artwork: " + e.getMessage());
@@ -135,11 +137,37 @@ public class JdbcArtworkDao implements ArtworkDao {
         return artworks;
     }
 
+    @Override
+    public List<Artwork> findById(Long id) {
+        List<Artwork> artworks = new ArrayList<>();
+        String sql = "SELECT aw.*, a.name AS artist_name, a.bio AS artist_bio, "
+                   + "a.contact_email AS artist_email, a.city AS artist_city, a.birthyear AS artist_birthyear "
+                   + "FROM Artwork aw "
+                   + "LEFT JOIN Artist a ON aw.Artist_ID = a.Artist_ID "
+                   + "WHERE aw.Artwork_ID = ? ORDER BY aw.Artwork_ID";
+
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    artworks.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching artwork by id: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return artworks;
+    }
+
     /**
      * Maps a ResultSet row to an Artwork object, including the linked Artist.
      */
     private Artwork mapRow(ResultSet rs) throws SQLException {
         Artwork aw = new Artwork();
+        aw.setId(rs.getLong("artwork_id"));
         aw.setTitle(rs.getString("title"));
         int year = rs.getInt("creationyear");
         aw.setCreationYear(rs.wasNull() ? null : year);
@@ -154,7 +182,6 @@ public class JdbcArtworkDao implements ArtworkDao {
             try {
                 aw.setStatus(Artwork.Status.valueOf(statut));
             } catch (IllegalArgumentException e) {
-                // If the DB value doesn't match the enum, keep default
                 aw.setStatus(Artwork.Status.FOR_SALE);
             }
         }

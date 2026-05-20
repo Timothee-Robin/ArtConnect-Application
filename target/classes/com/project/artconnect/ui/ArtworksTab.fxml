@@ -17,4 +17,10 @@
             <TableColumn fx:id="statusColumn" text="Status" prefWidth="150" />
         </columns>
     </TableView>
+
+    <HBox spacing="10.0" alignment="CENTER_RIGHT">
+        <Button fx:id="addButton" text="Add Artwork" onAction="#handleAddArtwork" />
+        <Button fx:id="editButton" text="Edit Selected" onAction="#handleEditArtwork" />
+        <Button fx:id="deleteButton" text="Delete Selected" onAction="#handleDeleteArtwork" />
+    </HBox>
 </VBox>

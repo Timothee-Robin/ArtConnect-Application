@@ -19,8 +19,8 @@
     </TableView>
 
     <HBox spacing="10.0" alignment="CENTER_RIGHT">
-        <Button text="Add Artwork" onAction="#handleAddArtwork" />
-        <Button text="Edit Selected" onAction="#handleEditArtwork" />
-        <Button text="Delete Selected" onAction="#handleDeleteArtwork" />
+        <Button fx:id="addButton" text="Add Artwork" onAction="#handleAddArtwork" />
+        <Button fx:id="editButton" text="Edit Selected" onAction="#handleEditArtwork" />
+        <Button fx:id="deleteButton" text="Delete Selected" onAction="#handleDeleteArtwork" />
     </HBox>
 </VBox>

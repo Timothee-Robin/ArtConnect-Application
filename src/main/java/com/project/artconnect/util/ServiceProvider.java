@@ -4,6 +4,7 @@ import com.project.artconnect.config.DatabaseConfig;
 import com.project.artconnect.service.*;
 import com.project.artconnect.service.impl.*;
 import com.project.artconnect.persistence.*;
+import com.project.artconnect.ui.MainController;
 
 /**
  * Service Provider to manage singleton instances of services.
@@ -19,6 +20,7 @@ public class ServiceProvider {
     private static final GalleryService galleryService;
     private static final WorkshopService workshopService;
     private static final CommunityService communityService;
+    private static MainController mainController;
 
     static {
         if (DatabaseConfig.USE_DATABASE) {
@@ -89,7 +91,15 @@ public class ServiceProvider {
     /**
      * Returns the current mode as a user-friendly string.
      */
-    public static String getModeName() {
+public static String getModeName() {
         return DatabaseConfig.USE_DATABASE ? "Supabase (PostgreSQL)" : "In-Memory";
+    }
+
+    public static MainController getMainController() {
+        return mainController;
+    }
+
+    public static void setMainController(MainController controller) {
+        mainController = controller;
     }
 }

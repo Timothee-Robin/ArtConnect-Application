@@ -50,7 +50,7 @@ public class DbArtworkService implements ArtworkService {
     }
 
     @Override
-    public void deleteArtwork(String title) {
-        artworkDao.delete(title);
+    public void deleteArtwork(Long id) {
+        artworkDao.delete(id);
     }
 }

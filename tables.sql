@@ -8,18 +8,20 @@ CREATE TABLE Artist (
     website VARCHAR(50),
     socialMedia VARCHAR(50),
     isActive BOOLEAN DEFAULT TRUE,
-    birthYear INT
+    birthYear INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Gallery (
     Gallery_ID SERIAL PRIMARY KEY,
     name VARCHAR(50),
-    adress VARCHAR(255),
+    address VARCHAR(255),
     ownerName VARCHAR(50),
     openingHours VARCHAR(50),
     contactPhone VARCHAR(50),
-    rating DECIMAL(15,2),
-    website VARCHAR(50)
+    rating NUMERIC(3,2),
+    website VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Exhibition (
@@ -30,18 +32,22 @@ CREATE TABLE Exhibition (
     Description TEXT,
     curatorName VARCHAR(50),
     theme VARCHAR(50),
-    Gallery_ID INT REFERENCES Gallery(Gallery_ID) ON DELETE CASCADE
+    Gallery_ID INT REFERENCES Gallery(Gallery_ID) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_exhibition_dates CHECK (endDate >= startDate)
 );
 
 CREATE TABLE Community_Member (
     CommunityMember_ID SERIAL PRIMARY KEY,
     name VARCHAR(50),
     email VARCHAR(50) UNIQUE,
+    password VARCHAR(255),
     birthYear INT,
     phone VARCHAR(50),
     city VARCHAR(50),
     membershipType VARCHAR(50),
-    password VARCHAR(50)
+    role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Workshop (
@@ -54,7 +60,8 @@ CREATE TABLE Workshop (
     location VARCHAR(100),
     description TEXT,
     level VARCHAR(50),
-    Artist_ID INT REFERENCES Artist(Artist_ID) ON DELETE SET NULL
+    Artist_ID INT REFERENCES Artist(Artist_ID) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Discipline (
@@ -78,9 +85,9 @@ CREATE TABLE Artwork (
     price DECIMAL(15,2),
     statut VARCHAR(50),
     Exhibition_ID INT REFERENCES Exhibition(Exhibition_ID) ON DELETE SET NULL,
-    Artist_ID INT REFERENCES Artist(Artist_ID) ON DELETE CASCADE
+    Artist_ID INT REFERENCES Artist(Artist_ID) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 
 
 CREATE TABLE Rate (
@@ -112,7 +119,7 @@ CREATE TABLE Tag (
     PRIMARY KEY (Artwork_ID, ArtworkTag_ID)
 );
 
-CREATE TABLE favored (
+CREATE TABLE FavoriteDiscipline (
     CommunityMember_ID INT REFERENCES Community_Member(CommunityMember_ID) ON DELETE CASCADE,
     Discipline_ID INT REFERENCES Discipline(Discipline_ID) ON DELETE CASCADE,
     PRIMARY KEY (CommunityMember_ID, Discipline_ID)

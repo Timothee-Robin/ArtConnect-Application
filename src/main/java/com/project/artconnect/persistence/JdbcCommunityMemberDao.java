@@ -75,7 +75,7 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
 
     @Override
     public void save(CommunityMember member) {
-        String sql = "INSERT INTO Community_Member (name, email, password, birthYear, phone, city, membershipType) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Community_Member (name, email, password, birthYear, phone, city, membershipType, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, member.getName());
@@ -89,6 +89,7 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
             ps.setString(5, member.getPhone());
             ps.setString(6, member.getCity());
             ps.setString(7, member.getMembershipType());
+            ps.setString(8, member.getRole());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -110,6 +111,7 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
         m.setPhone(rs.getString("phone"));
         m.setCity(rs.getString("city"));
         m.setMembershipType(rs.getString("membershiptype"));
+        m.setRole(rs.getString("role"));
         return m;
     }
 }

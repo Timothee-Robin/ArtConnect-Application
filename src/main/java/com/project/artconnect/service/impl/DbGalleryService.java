@@ -10,10 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Database-backed implementation of GalleryService.
- * Delegates to JdbcGalleryDao and JdbcExhibitionDao.
- */
 public class DbGalleryService implements GalleryService {
 
     private final GalleryDao galleryDao;
@@ -27,13 +23,12 @@ public class DbGalleryService implements GalleryService {
     @Override
     public List<Gallery> getAllGalleries() {
         List<Gallery> galleries = galleryDao.findAll();
-        // Load exhibitions for each gallery
         List<Exhibition> allExhibitions = exhibitionDao.findAll();
         for (Gallery g : galleries) {
             for (Exhibition e : allExhibitions) {
                 if (e.getGallery() != null && e.getGallery().getName() != null
                         && e.getGallery().getName().equals(g.getName())) {
-                    e.setGallery(g); // Link back to the same Gallery object
+                    e.setGallery(g);
                     g.getExhibitions().add(e);
                 }
             }
@@ -51,15 +46,50 @@ public class DbGalleryService implements GalleryService {
     @Override
     public List<Exhibition> getExhibitionsByGallery(Gallery gallery) {
         if (gallery == null) return Collections.emptyList();
-        // If exhibitions are already loaded
         if (gallery.getExhibitions() != null && !gallery.getExhibitions().isEmpty()) {
             return gallery.getExhibitions();
         }
-        // Otherwise reload
         return getAllGalleries().stream()
-                .filter(g -> g.getName().equals(gallery.getName()))
+                .filter(g -> g.getName() != null && g.getName().equals(gallery.getName()))
                 .findFirst()
                 .map(Gallery::getExhibitions)
                 .orElse(Collections.emptyList());
+    }
+
+    @Override
+    public Gallery createGallery(Gallery gallery) {
+        galleryDao.save(gallery);
+        return gallery;
+    }
+
+    @Override
+    public Gallery updateGallery(Gallery gallery) {
+        galleryDao.update(gallery);
+        return gallery;
+    }
+
+    @Override
+    public void deleteGallery(Long id) {
+        galleryDao.delete(id);
+    }
+
+    @Override
+    public void addExhibitionToGallery(Exhibition exhibition) {
+        exhibitionDao.save(exhibition);
+    }
+
+    @Override
+    public void updateExhibition(Exhibition exhibition) {
+        exhibitionDao.update(exhibition);
+    }
+
+    @Override
+    public void deleteExhibition(Long id) {
+        exhibitionDao.delete(id);
+    }
+
+    @Override
+    public List<Exhibition> getAllExhibitions() {
+        return exhibitionDao.findAll();
     }
 }

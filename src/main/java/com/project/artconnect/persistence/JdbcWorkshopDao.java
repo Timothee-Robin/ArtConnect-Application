@@ -90,4 +90,78 @@ public class JdbcWorkshopDao implements WorkshopDao {
 
         return w;
     }
+
+    @Override
+    public void save(Workshop workshop) {
+        String sql = "INSERT INTO Workshop (title, workshopdate, duration, maxparticipant, price, location, description, level, Artist_ID) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, (SELECT Artist_ID FROM Artist WHERE name = ?))";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+            ps.setString(1, workshop.getTitle());
+            if (workshop.getDate() != null) {
+                ps.setTimestamp(2, Timestamp.valueOf(workshop.getDate()));
+            } else {
+                ps.setNull(2, Types.TIMESTAMP);
+            }
+            ps.setInt(3, workshop.getDurationMinutes());
+            ps.setInt(4, workshop.getMaxParticipants());
+            ps.setDouble(5, workshop.getPrice());
+            ps.setString(6, workshop.getLocation());
+            ps.setString(7, workshop.getDescription());
+            ps.setString(8, workshop.getLevel());
+            if (workshop.getInstructor() != null && workshop.getInstructor().getName() != null) {
+                ps.setString(9, workshop.getInstructor().getName());
+            } else {
+                ps.setNull(9, Types.VARCHAR);
+            }
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error saving workshop: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void update(Workshop workshop) {
+        String sql = "UPDATE Workshop SET workshopdate=?, duration=?, maxparticipant=?, price=?, location=?, description=?, level=?, Artist_ID=(SELECT Artist_ID FROM Artist WHERE name=?) WHERE title=?";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+             
+            if (workshop.getDate() != null) {
+                ps.setTimestamp(1, Timestamp.valueOf(workshop.getDate()));
+            } else {
+                ps.setNull(1, Types.TIMESTAMP);
+            }
+            ps.setInt(2, workshop.getDurationMinutes());
+            ps.setInt(3, workshop.getMaxParticipants());
+            ps.setDouble(4, workshop.getPrice());
+            ps.setString(5, workshop.getLocation());
+            ps.setString(6, workshop.getDescription());
+            ps.setString(7, workshop.getLevel());
+            if (workshop.getInstructor() != null && workshop.getInstructor().getName() != null) {
+                ps.setString(8, workshop.getInstructor().getName());
+            } else {
+                ps.setNull(8, Types.VARCHAR);
+            }
+            ps.setString(9, workshop.getTitle());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error updating workshop: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void delete(String title) {
+        String sql = "DELETE FROM Workshop WHERE title = ?";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, title);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error deleting workshop: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

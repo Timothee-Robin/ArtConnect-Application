@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ArtistService {
+
     List<Artist> getAllArtists();
 
     Optional<Artist> getArtistByName(String name);
@@ -14,7 +15,7 @@ public interface ArtistService {
 
     void updateArtist(Artist artist);
 
-    void deleteArtist(String name);
+    void deleteArtist(Long id);
 
     List<Discipline> getAllDisciplines();
 
