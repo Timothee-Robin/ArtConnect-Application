@@ -98,15 +98,24 @@ public class JdbcArtistDao implements ArtistDao {
         String deleteSql = "DELETE FROM Artist WHERE Artist_ID = ?";
 
         try (Connection conn = ConnectionManager.getConnection()) {
-            // First deactivate (satisfies the trigger)
-            try (PreparedStatement ps = conn.prepareStatement(deactivateSql)) {
-                ps.setLong(1, id);
-                ps.executeUpdate();
-            }
-            // Then delete
-            try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
-                ps.setLong(1, id);
-                ps.executeUpdate();
+            conn.setAutoCommit(false);
+            try {
+                // First deactivate (satisfies the trigger)
+                try (PreparedStatement ps = conn.prepareStatement(deactivateSql)) {
+                    ps.setLong(1, id);
+                    ps.executeUpdate();
+                }
+                // Then delete
+                try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
+                    ps.setLong(1, id);
+                    ps.executeUpdate();
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
         } catch (SQLException e) {
             throw new RuntimeException("Database error deleting artist: " + e.getMessage());

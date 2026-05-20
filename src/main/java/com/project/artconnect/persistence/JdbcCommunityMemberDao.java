@@ -77,7 +77,7 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
     public void save(CommunityMember member) {
         String sql = "INSERT INTO Community_Member (name, email, password, birthYear, phone, city, membershipType, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConnectionManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, member.getName());
             ps.setString(2, member.getEmail());
             ps.setString(3, member.getPassword());
@@ -91,6 +91,9 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
             ps.setString(7, member.getMembershipType());
             ps.setString(8, member.getRole());
             ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) member.setId(keys.getLong(1));
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -101,6 +104,7 @@ public class JdbcCommunityMemberDao implements CommunityMemberDao {
      */
     private CommunityMember mapRow(ResultSet rs) throws SQLException {
         CommunityMember m = new CommunityMember();
+        m.setId(rs.getLong("CommunityMember_ID"));
         m.setName(rs.getString("name"));
         m.setEmail(rs.getString("email"));
         try {

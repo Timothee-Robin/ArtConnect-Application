@@ -72,7 +72,7 @@ public class WorkshopController {
         if (s == null) { showAlert("No Selection", "Please select a workshop to delete."); return; }
         Alert c = new Alert(Alert.AlertType.CONFIRMATION);
         c.setTitle("Confirm Deletion"); c.setHeaderText("Delete \"" + s.getTitle() + "\"?");
-        c.showAndWait().ifPresent(r -> { if (r == ButtonType.OK) { workshopService.deleteWorkshop(s.getTitle()); refreshTable(); } });
+        c.showAndWait().ifPresent(r -> { if (r == ButtonType.OK) { workshopService.deleteWorkshop(s.getId()); refreshTable(); } });
     }
 
     private Dialog<Workshop> createDialog(Workshop existing) {

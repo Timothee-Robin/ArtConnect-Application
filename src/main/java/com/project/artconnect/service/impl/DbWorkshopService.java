@@ -108,7 +108,7 @@ public class DbWorkshopService implements WorkshopService {
     }
 
     @Override
-    public void deleteWorkshop(String title) {
-        workshopDao.delete(title);
+    public void deleteWorkshop(Long id) {
+        workshopDao.delete(id);
     }
 }

@@ -63,7 +63,11 @@ public class JdbcExhibitionDao implements ExhibitionDao {
             ps.setString(4, exhibition.getDescription());
             ps.setString(5, exhibition.getCuratorName());
             ps.setString(6, exhibition.getTheme());
-            ps.setLong(7, exhibition.getGallery() != null ? exhibition.getGallery().getId() : 0);
+            if (exhibition.getGallery() != null && exhibition.getGallery().getId() != null) {
+                ps.setLong(7, exhibition.getGallery().getId());
+            } else {
+                ps.setNull(7, Types.BIGINT);
+            }
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) exhibition.setId(keys.getLong(1));
@@ -84,7 +88,11 @@ public class JdbcExhibitionDao implements ExhibitionDao {
             ps.setString(4, exhibition.getDescription());
             ps.setString(5, exhibition.getCuratorName());
             ps.setString(6, exhibition.getTheme());
-            ps.setLong(7, exhibition.getGallery() != null ? exhibition.getGallery().getId() : 0);
+            if (exhibition.getGallery() != null && exhibition.getGallery().getId() != null) {
+                ps.setLong(7, exhibition.getGallery().getId());
+            } else {
+                ps.setNull(7, Types.BIGINT);
+            }
             ps.setLong(8, exhibition.getId());
             ps.executeUpdate();
         } catch (SQLException e) {

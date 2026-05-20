@@ -13,5 +13,5 @@ public interface WorkshopDao {
     
     void update(Workshop workshop);
     
-    void delete(String title);
+    void delete(Long id);
 }

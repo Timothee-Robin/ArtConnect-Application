@@ -42,11 +42,7 @@ public class ExhibitionController {
     private MainController getMainController() { return ServiceProvider.getMainController(); }
 
     public void refreshTable() {
-        List<Exhibition> all = new ArrayList<>();
-        for (Gallery g : galleryService.getAllGalleries()) {
-            all.addAll(g.getExhibitions());
-        }
-        exhibitionTable.setItems(FXCollections.observableArrayList(all));
+        exhibitionTable.setItems(FXCollections.observableArrayList(galleryService.getAllExhibitions()));
     }
 
     @FXML private void handleAddExhibition() {

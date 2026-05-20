@@ -18,7 +18,7 @@ public class JdbcWorkshopDao implements WorkshopDao {
 
     @Override
     public Optional<Workshop> findById(Long id) {
-        String sql = "SELECT w.*, a.name AS artist_name "
+        String sql = "SELECT w.*, a.Artist_ID AS artist_id, a.name AS artist_name "
                    + "FROM Workshop w "
                    + "LEFT JOIN Artist a ON w.Artist_ID = a.Artist_ID "
                    + "WHERE w.Workshop_ID = ?";
@@ -42,7 +42,7 @@ public class JdbcWorkshopDao implements WorkshopDao {
     @Override
     public List<Workshop> findAll() {
         List<Workshop> workshops = new ArrayList<>();
-        String sql = "SELECT w.*, a.name AS artist_name "
+        String sql = "SELECT w.*, a.Artist_ID AS artist_id, a.name AS artist_name "
                    + "FROM Workshop w "
                    + "LEFT JOIN Artist a ON w.Artist_ID = a.Artist_ID "
                    + "ORDER BY w.Workshop_ID";
@@ -66,6 +66,7 @@ public class JdbcWorkshopDao implements WorkshopDao {
      */
     private Workshop mapRow(ResultSet rs) throws SQLException {
         Workshop w = new Workshop();
+        w.setId(rs.getLong("Workshop_ID"));
         w.setTitle(rs.getString("title"));
 
         Timestamp ts = rs.getTimestamp("workshopdate");
@@ -84,6 +85,7 @@ public class JdbcWorkshopDao implements WorkshopDao {
         String artistName = rs.getString("artist_name");
         if (artistName != null) {
             Artist instructor = new Artist();
+            instructor.setId(rs.getLong("artist_id"));
             instructor.setName(artistName);
             w.setInstructor(instructor);
         }
@@ -95,6 +97,39 @@ public class JdbcWorkshopDao implements WorkshopDao {
     public void save(Workshop workshop) {
         String sql = "INSERT INTO Workshop (title, workshopdate, duration, maxparticipant, price, location, description, level, Artist_ID) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, (SELECT Artist_ID FROM Artist WHERE name = ?))";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             
+            ps.setString(1, workshop.getTitle());
+            if (workshop.getDate() != null) {
+                ps.setTimestamp(2, Timestamp.valueOf(workshop.getDate()));
+            } else {
+                ps.setNull(2, Types.TIMESTAMP);
+            }
+            ps.setInt(3, workshop.getDurationMinutes());
+            ps.setInt(4, workshop.getMaxParticipants());
+            ps.setDouble(5, workshop.getPrice());
+            ps.setString(6, workshop.getLocation());
+            ps.setString(7, workshop.getDescription());
+            ps.setString(8, workshop.getLevel());
+            if (workshop.getInstructor() != null && workshop.getInstructor().getName() != null) {
+                ps.setString(9, workshop.getInstructor().getName());
+            } else {
+                ps.setNull(9, Types.VARCHAR);
+            }
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) workshop.setId(keys.getLong(1));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error saving workshop: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void update(Workshop workshop) {
+        String sql = "UPDATE Workshop SET title=?, workshopdate=?, duration=?, maxparticipant=?, price=?, location=?, description=?, level=?, Artist_ID=(SELECT Artist_ID FROM Artist WHERE name=?) WHERE Workshop_ID=?";
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
              
@@ -115,36 +150,7 @@ public class JdbcWorkshopDao implements WorkshopDao {
             } else {
                 ps.setNull(9, Types.VARCHAR);
             }
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("Error saving workshop: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void update(Workshop workshop) {
-        String sql = "UPDATE Workshop SET workshopdate=?, duration=?, maxparticipant=?, price=?, location=?, description=?, level=?, Artist_ID=(SELECT Artist_ID FROM Artist WHERE name=?) WHERE title=?";
-        try (Connection conn = ConnectionManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-             
-            if (workshop.getDate() != null) {
-                ps.setTimestamp(1, Timestamp.valueOf(workshop.getDate()));
-            } else {
-                ps.setNull(1, Types.TIMESTAMP);
-            }
-            ps.setInt(2, workshop.getDurationMinutes());
-            ps.setInt(3, workshop.getMaxParticipants());
-            ps.setDouble(4, workshop.getPrice());
-            ps.setString(5, workshop.getLocation());
-            ps.setString(6, workshop.getDescription());
-            ps.setString(7, workshop.getLevel());
-            if (workshop.getInstructor() != null && workshop.getInstructor().getName() != null) {
-                ps.setString(8, workshop.getInstructor().getName());
-            } else {
-                ps.setNull(8, Types.VARCHAR);
-            }
-            ps.setString(9, workshop.getTitle());
+            ps.setLong(10, workshop.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error updating workshop: " + e.getMessage());
@@ -153,11 +159,11 @@ public class JdbcWorkshopDao implements WorkshopDao {
     }
 
     @Override
-    public void delete(String title) {
-        String sql = "DELETE FROM Workshop WHERE title = ?";
+    public void delete(Long id) {
+        String sql = "DELETE FROM Workshop WHERE Workshop_ID = ?";
         try (Connection conn = ConnectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, title);
+            ps.setLong(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error deleting workshop: " + e.getMessage());

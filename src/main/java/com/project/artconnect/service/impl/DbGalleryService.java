@@ -24,10 +24,19 @@ public class DbGalleryService implements GalleryService {
     public List<Gallery> getAllGalleries() {
         List<Gallery> galleries = galleryDao.findAll();
         List<Exhibition> allExhibitions = exhibitionDao.findAll();
+
+        java.util.Map<Long, Gallery> galleryMap = new java.util.HashMap<>();
         for (Gallery g : galleries) {
-            for (Exhibition e : allExhibitions) {
-                if (e.getGallery() != null && e.getGallery().getName() != null
-                        && e.getGallery().getName().equals(g.getName())) {
+            if (g.getId() != null) {
+                galleryMap.put(g.getId(), g);
+            }
+        }
+
+        // Associate exhibitions with their respective galleries
+        for (Exhibition e : allExhibitions) {
+            if (e.getGallery() != null && e.getGallery().getId() != null) {
+                Gallery g = galleryMap.get(e.getGallery().getId());
+                if (g != null) {
                     e.setGallery(g);
                     g.getExhibitions().add(e);
                 }

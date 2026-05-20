@@ -39,7 +39,7 @@ public class InMemoryWorkshopService implements WorkshopService {
 
     // CRUD
     public Workshop createWorkshop(Workshop workshop) {
-        workshop.setTitle(workshop.getTitle()); // name stays as-is
+        workshop.setId(nextId++);
         workshops.put(workshop.getTitle(), workshop);
         return workshop;
     }
@@ -50,8 +50,8 @@ public class InMemoryWorkshopService implements WorkshopService {
         return workshop;
     }
 
-    public void deleteWorkshop(String title) {
-        workshops.remove(title);
+    public void deleteWorkshop(Long id) {
+        workshops.values().removeIf(w -> Objects.equals(w.getId(), id));
     }
 
     public Optional<Workshop> getWorkshopByTitle(String title) {

@@ -18,7 +18,7 @@ public class JdbcArtworkDao implements ArtworkDao {
     @Override
     public List<Artwork> findAll() {
         List<Artwork> artworks = new ArrayList<>();
-        String sql = "SELECT aw.*, a.name AS artist_name, a.bio AS artist_bio, "
+        String sql = "SELECT aw.*, a.Artist_ID AS artist_id, a.name AS artist_name, a.bio AS artist_bio, "
                    + "a.contact_email AS artist_email, a.city AS artist_city, a.birthyear AS artist_birthyear "
                    + "FROM Artwork aw "
                    + "LEFT JOIN Artist a ON aw.Artist_ID = a.Artist_ID "
@@ -59,7 +59,11 @@ public class JdbcArtworkDao implements ArtworkDao {
             ps.setDouble(7, artwork.getPrice());
             ps.setString(8, artwork.getStatus() != null ? artwork.getStatus().name() : "FOR_SALE");
             ps.setNull(9, Types.INTEGER); // Exhibition_ID handled separately if needed
-            ps.setLong(10, artwork.getArtist().getId());
+            if (artwork.getArtist() != null && artwork.getArtist().getId() != null) {
+                ps.setLong(10, artwork.getArtist().getId());
+            } else {
+                ps.setNull(10, Types.BIGINT);
+            }
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -115,7 +119,7 @@ public class JdbcArtworkDao implements ArtworkDao {
     @Override
     public List<Artwork> findByArtistName(String artistName) {
         List<Artwork> artworks = new ArrayList<>();
-        String sql = "SELECT aw.*, a.name AS artist_name, a.bio AS artist_bio, "
+        String sql = "SELECT aw.*, a.Artist_ID AS artist_id, a.name AS artist_name, a.bio AS artist_bio, "
                    + "a.contact_email AS artist_email, a.city AS artist_city, a.birthyear AS artist_birthyear "
                    + "FROM Artwork aw "
                    + "LEFT JOIN Artist a ON aw.Artist_ID = a.Artist_ID "
@@ -140,7 +144,7 @@ public class JdbcArtworkDao implements ArtworkDao {
     @Override
     public List<Artwork> findById(Long id) {
         List<Artwork> artworks = new ArrayList<>();
-        String sql = "SELECT aw.*, a.name AS artist_name, a.bio AS artist_bio, "
+        String sql = "SELECT aw.*, a.Artist_ID AS artist_id, a.name AS artist_name, a.bio AS artist_bio, "
                    + "a.contact_email AS artist_email, a.city AS artist_city, a.birthyear AS artist_birthyear "
                    + "FROM Artwork aw "
                    + "LEFT JOIN Artist a ON aw.Artist_ID = a.Artist_ID "
@@ -190,6 +194,7 @@ public class JdbcArtworkDao implements ArtworkDao {
         String artistName = rs.getString("artist_name");
         if (artistName != null) {
             Artist artist = new Artist();
+            artist.setId(rs.getLong("artist_id"));
             artist.setName(artistName);
             artist.setBio(rs.getString("artist_bio"));
             artist.setContactEmail(rs.getString("artist_email"));

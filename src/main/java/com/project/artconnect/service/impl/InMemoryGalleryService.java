@@ -66,7 +66,7 @@ public class InMemoryGalleryService implements GalleryService {
         // name is primary key in in-memory, update if name unchanged
         if (gallery.getId() != null) {
             galleries.values().stream()
-                    .filter(g -> g.getId().equals(gallery.getId()))
+                    .filter(g -> Objects.equals(g.getId(), gallery.getId()))
                     .findFirst()
                     .ifPresent(existing -> {
                         existing.setAddress(gallery.getAddress());
@@ -81,7 +81,7 @@ public class InMemoryGalleryService implements GalleryService {
     }
 
     public void deleteGallery(Long id) {
-        galleries.values().removeIf(g -> g.getId().equals(id));
+        galleries.values().removeIf(g -> Objects.equals(g.getId(), id));
     }
 
     // Exhibition CRUD

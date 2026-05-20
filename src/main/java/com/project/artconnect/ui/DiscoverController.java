@@ -54,8 +54,8 @@ public class DiscoverController {
                         setStyle("-fx-font-weight: bold;");
                     }
                 },
-                new Label("Theme: " + e.getTheme()),
-                new Label("Gallery: " + (e.getGallery() != null ? e.getGallery().getName() : "Unknown")));
+                new Label("Theme: " + (e.getTheme() != null ? e.getTheme() : "N/A")),
+                new Label("Gallery: " + (e.getGallery() != null && e.getGallery().getName() != null ? e.getGallery().getName() : "Unknown")));
         discoverPane.getChildren().add(card);
     }
 
@@ -72,7 +72,7 @@ public class DiscoverController {
                         setStyle("-fx-font-weight: bold;");
                     }
                 },
-                new Label("Instructor: " + (w.getInstructor() != null ? w.getInstructor().getName() : "Unknown")),
+                new Label("Instructor: " + (w.getInstructor() != null && w.getInstructor().getName() != null ? w.getInstructor().getName() : "Unknown")),
                 new Label("Price: $" + w.getPrice()));
         discoverPane.getChildren().add(card);
     }

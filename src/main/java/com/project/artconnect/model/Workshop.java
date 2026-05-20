@@ -13,7 +13,17 @@ public class Workshop {
     private String description;
     private String level; // beginner, intermediate, advanced
 
+    private Long id;
+
     public Workshop() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Workshop(String title, LocalDateTime date, Artist instructor, double price) {
